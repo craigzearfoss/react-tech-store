@@ -1,4 +1,9 @@
-# Tech Store Porject
+# Tech Store Project
+
+### Resources
+- [Text Shadow Generator](https://html-css-js.com/css/generator/text-shadow/)
+- [Box Shadow Generator](https://www.cssmatic.com/box-shadow)
+
 
 ```
 create-react-app tech-store
@@ -30,3 +35,4 @@ const Button = style.button`
   font-size: ${(props) => props.large ? "3rem" : "1rem")};
 `;
 ``` 
+
