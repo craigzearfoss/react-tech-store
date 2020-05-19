@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { linkData } from "./linkData";
 import { socialData } from "./socialData";
 import { items } from "./productData";
-import { isStyledComponent } from "styled-components";
 
 const ProductContext = React.createContext();
 
@@ -16,11 +15,12 @@ class ProductProvider extends Component {
     cartItems: 0,
     cartSubTotal: 0,
     cartTax: 0,
+    cartTotal: 0,
     storeProducts: [],
     filteredProducts: [],
     featuredProducts: [],
     singleProduct: {},
-    loading: false,
+    loading: true,
   };
 
   componentDidMount() {
@@ -39,46 +39,114 @@ class ProductProvider extends Component {
 
     // featured products
     let featuredProducts = storeProducts.filter(
-      (item) => (item.featured === true)
+      (item) => item.featured === true
     );
 
-    this.setState({
-      storeProducts,
-      filteredProducts: storeProducts,
-      featuredProducts,
-      cart: this.getStorageCart(),
-      singleProduct: this.getStorageProduct(),
-      loading: false,
-    });
+    this.setState(
+      {
+        storeProducts,
+        filteredProducts: storeProducts,
+        featuredProducts,
+        cart: this.getStorageCart(),
+        singleProduct: this.getStorageProduct(),
+        loading: false,
+      },
+      () => {
+        this.addTotals();
+      }
+    );
   };
 
   // get cart from local storage
   getStorageCart = () => {
-    return [];
+    let cart;
+    if (localStorage.getItem("cart")) {
+      cart = JSON.parse(localStorage.getItem("cart"));
+    } else {
+      cart = [];
+    }
+    return cart;
   };
 
   // get product from local storage
   getStorageProduct = () => {
-    return {};
+    return localStorage.getItem("singleProduct")
+      ? JSON.parse(localStorage.getItem("singleProduct"))
+      : [];
   };
 
   // get totals
-  getTotals = () => {};
+  getTotals = () => {
+    let subTotal = 0;
+    let cartItems = 0;
+    this.state.cart.forEach((item) => {
+      subTotal += item.total;
+      cartItems += item.count;
+    });
+
+    subTotal = parseFloat(subTotal.toFixed(2));
+    let tax = subTotal * 0.2;
+    tax = parseFloat(tax.toFixed(2));
+    let total = subTotal + tax;
+    total = parseFloat(total.toFixed(2));
+    return {
+      cartItems,
+      subTotal,
+      tax,
+      total,
+    };
+  };
 
   // add totals
-  addTotals = () => {};
+  addTotals = () => {
+    const totals = this.getTotals();
+    this.setState(() => {
+      return {
+        cartItems: totals.cartItems,
+        cartSubTotal: totals.subTotal,
+        cartTax: totals.tax,
+        cartTotal: totals.total,
+      };
+    });
+  };
 
   // sync storage (run every time we add an item to the cart)
-  syncStorage = () => {};
+  syncStorage = () => {
+    localStorage.setItem("cart", JSON.stringify(this.state.cart));
+  };
 
   // add to cart
   addToCart = (id) => {
-    console.log(`add to cart ${id}`);
+    let tempCart = [...this.state.cart];
+    let tempProducts = [...this.state.storeProducts];
+    let tempItem = tempCart.find((item) => item.id === id);
+    if (!tempItem) {
+      tempItem = tempProducts.find((item) => item.id === id);
+      let total = tempItem.price;
+      let cartItem = { ...tempItem, count: 1, total };
+      tempCart = [...tempCart, cartItem];
+    } else {
+      tempItem.count++;
+      tempItem.total = tempItem.price * tempItem.count;
+      tempItem.total = parseFloat(tempItem.total.toFixed(2));
+    }
+    this.setState(
+      () => {
+        return { cart: tempCart };
+      },
+      () => {
+        this.addTotals();
+        this.syncStorage();
+        this.openCart();
+      }
+    );
   };
 
   // set single product
   setSingleProduct = (id) => {
-    console.log(`set single product ${id}`);
+    let product = this.state.storeProducts.find((item) => item.id === id);
+    localStorage.setItem("singleProduct", JSON.stringify(product));
+    this.setState({ singleProduct: { ...product }, loading: false });
   };
 
   // handle side bar
@@ -101,6 +169,80 @@ class ProductProvider extends Component {
     this.setState({ cartOpen: true });
   };
 
+  // cat fuctionality
+  // increment
+  increment = (id) => {
+    let tempCart = [...this.state.cart];
+    const cartItem = tempCart.find((item) => item.id === id);
+    cartItem.count++;
+    cartItem.total = cartItem.count * cartItem.price;
+    cartItem.total = parseFloat(cartItem.total.toFixed(2));
+    this.setState(
+      () => {
+        return {
+          cart: [...tempCart],
+        };
+      },
+      () => {
+        this.addTotals();
+        this.syncStorage();
+      }
+    );
+  };
+
+  // decrement
+  decrement = (id) => {
+    let tempCart = [...this.state.cart];
+    const cartItem = tempCart.find((item) => item.id === id);
+
+    cartItem.count = cartItem.count - 1;
+    if (cartItem.count === 0) {
+      this.removeItem(id);
+    } else {
+      cartItem.total = cartItem.count * cartItem.price;
+      cartItem.total = parseFloat(cartItem.total.toFixed(2));
+      this.setState(
+        () => {
+          return {
+            cart: [...tempCart],
+          };
+        },
+        () => {
+          this.addTotals();
+          this.syncStorage();
+        }
+      );
+    }
+  };
+
+  // remove item
+  removeItem = (id) => {
+    let tempCart = [...this.state.cart];
+    tempCart = tempCart.filter((item) => item.id !== id);
+    this.setState(
+      {
+        cart: [...tempCart],
+      },
+      () => {
+        this.addTotals();
+        this.syncStorage();
+      }
+    );
+  };
+
+  // clear cart
+  clearCart = () => {
+    this.setState(
+      {
+        cart: [],
+      },
+      () => {
+        this.addTotals();
+        this.syncStorage();
+      }
+    );
+  };
+
   render() {
     return (
       <ProductContext.Provider
@@ -112,6 +254,10 @@ class ProductProvider extends Component {
           openCart: this.openCart,
           addToCart: this.addToCart,
           setSingleProduct: this.setSingleProduct,
+          increment: this.increment,
+          decrement: this.decrement,
+          removeItem: this.removeItem,
+          clearCart: this.clearCart,
         }}
       >
         {this.props.children}
