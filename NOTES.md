@@ -89,3 +89,10 @@ export default class MyApp extends React.Component {
     }
 }
 ```
+
+## Fix for Netlify Non-root Routes
+- [Page Not Found on Netlify with React Router](https://sung.codes/blog/2018/12/18/page-not-found-on-netlify-with-react-router/)
+- Create the file */public/_rdirects*:
+```
+/*    /index.html   200
+```

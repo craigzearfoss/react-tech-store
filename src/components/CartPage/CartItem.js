@@ -17,8 +17,8 @@ export default function CartItem({
       {/* image */}
       <div className="col-10 mx-auto col-lg-2 pb-2">
         <img
-          src={`../${image}`}
-          //src={image}
+          //src={`../${image}`}
+          src={image}
           width="60"
           className="img-fluid"
           alt="product"
@@ -33,7 +33,8 @@ export default function CartItem({
       {/* end of title */}
       {/* price */}
       <div className="col-10 mx-auto col-lg-2 pb-2">
-        <span className="d-lg-none">price : $</span>{price}
+        <span className="d-lg-none">price : $</span>
+        {price}
       </div>
       {/* end of price */}
       {/* count controls*/}
