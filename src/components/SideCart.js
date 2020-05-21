@@ -18,7 +18,7 @@ export default function SideCart() {
                       width="35"
                       //src={`../${item.image}`}
                       src={item.image}
-                      alt="cart-item"
+                      alt="cart item"
                     />
                     <div className="mt-3">
                       <h6 className="text-uppercase">{item.title}</h6>

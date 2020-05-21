@@ -16,7 +16,7 @@ export default function Featured() {
             {(value) => {
               const { featuredProducts } = value;
               return featuredProducts.map((product) => (
-                <Product key={product.id} product={product}></Product>
+                <Product key={product.id} product={product} />
               ));
             }}
           </ProductConsumer>

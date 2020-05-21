@@ -16,7 +16,7 @@ export default function Products() {
               <Title center title="our products" />
               {/* product filter */}
               <ProductFilter />
-              {/* product count */}
+              {/* total count */}
               <div className="row">
                 <div className="col-10 mx-auto">
                   <h6 className="text-title">

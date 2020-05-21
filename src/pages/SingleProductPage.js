@@ -31,7 +31,7 @@ export default function SingleProductPage() {
                       //src={`../${image}`}
                       src={image}
                       alt="single product"
-                      className="image-fluid"
+                      className="img-fluid"
                     />
                   </div>
                   <div className="col-10 mx-auto col-sm-8 col-md-6 my-3">
@@ -42,7 +42,7 @@ export default function SingleProductPage() {
                     <h5 className="text-main text-capitalize mb-4">
                       price : ${price}
                     </h5>
-                    <p className="text-capitalize tex-title mt-3">
+                    <p className="text-capitalize text-title mt-3">
                       some info about product :
                     </p>
                     <p>{description}</p>
